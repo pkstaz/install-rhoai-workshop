@@ -38,17 +38,13 @@ cd install-rhoai-workshop
 Create env
 ```
 OCP_DOMAIN=$(oc get IngressController default -n openshift-ingress-operator -o json | jq -r '.status.domain')
-```
-```
+
 INFRA_NAME=$(oc get infrastructure cluster -o json | jq -r '.status.infrastructureName')
-```
-```
+
 SUBNET=$(oc get machineset.machine.openshift.io -n openshift-machine-api -o jsonpath='{.items[0].spec.template.spec.providerSpec.value.subnet.filters[0].values[0]}')
-```
-```
+
 AVAILABILITYZONE=$(oc get machineset.machine.openshift.io -n openshift-machine-api -o jsonpath='{.items[0].spec.template.spec.providerSpec.value.placement.availabilityZone}')
-```
-```
+
 REGION=$(oc get machineset.machine.openshift.io -n openshift-machine-api -o jsonpath='{.items[0].spec.template.spec.providerSpec.value.placement.region}')
 ```
 
