@@ -1,0 +1,1 @@
+# install-rhoai-workshop
