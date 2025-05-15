@@ -54,5 +54,5 @@ REGION=$(oc get machineset.machine.openshift.io -n openshift-machine-api -o json
 
 create machine-set using helm
 ```
-helm install gpu-machine-set demo-cluster-config --set infraName=$INFRA_NAME --set subnet=$SUBNET --set availabilityZone=$AVAILABILITYZONE --set region=$REGION
+helm install gpu-machine-set gpu-machine-set --set infraName=$INFRA_NAME --set subnet=$SUBNET --set availabilityZone=$AVAILABILITYZONE --set region=$REGION
 ```
