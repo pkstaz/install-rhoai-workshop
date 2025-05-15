@@ -1,0 +1,12 @@
+app: demo-cluster-config
+
+infraName: 
+subnet:
+availabilityZone:
+region:
+
+gpuMachineset:
+  name: gpu-node
+  instance: g5.2xlarge
+
+replicas: 1

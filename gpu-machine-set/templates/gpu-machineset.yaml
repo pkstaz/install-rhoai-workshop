@@ -1,0 +1,88 @@
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  annotations:
+    capacity.cluster-autoscaler.kubernetes.io/labels: kubernetes.io/arch=amd64
+    machine.openshift.io/GPU: "1"
+    machine.openshift.io/memoryMb: "16384"
+    machine.openshift.io/vCPU: "4"
+  labels:
+    machine.openshift.io/cluster-api-cluster: {{ .Values.infraName }}
+  name: {{ .Values.infraName }}-{{ .Values.gpuMachineset.name }}
+  namespace: openshift-machine-api
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-cluster: {{ .Values.infraName }}
+      machine.openshift.io/cluster-api-machineset: {{ .Values.infraName }}-{{ .Values.gpuMachineset.name }}
+  template:
+    metadata:
+      labels:
+        machine.openshift.io/cluster-api-cluster: {{ .Values.infraName }}
+        machine.openshift.io/cluster-api-machine-role: worker
+        machine.openshift.io/cluster-api-machine-type: worker
+        machine.openshift.io/cluster-api-machineset: {{ .Values.infraName }}-{{ .Values.gpuMachineset.name }}
+    spec:
+      lifecycleHooks: {}
+      metadata: {}
+      providerSpec:
+        value:
+          ami:
+            id: ami-09a50cc0693e3a489
+          apiVersion: machine.openshift.io/v1beta1
+          blockDevices:
+          - ebs:
+              encrypted: true
+              iops: 0
+              kmsKey:
+                arn: ""
+              volumeSize: 100
+              volumeType: gp2
+          credentialsSecret:
+            name: aws-cloud-credentials
+          deviceIndex: 0
+          iamInstanceProfile:
+            id: {{ .Values.infraName }}-worker-profile
+          instanceType: {{ .Values.gpuMachineset.instance }}
+          kind: AWSMachineProviderConfig
+          metadata:
+            creationTimestamp: null
+          metadataServiceOptions: {}
+          placement:
+            availabilityZone: {{ .Values.availabilityZone }}
+            region: {{ .Values.region }}
+          securityGroups:
+          - filters:
+            - name: tag:Name
+              values:
+              - {{ .Values.infraName }}-node
+          - filters:
+            - name: tag:Name
+              values:
+              - {{ .Values.infraName }}-lb
+          subnet:
+            filters:
+            - name: tag:Name
+              values:
+              - {{ .Values.subnet }}
+          tags:
+          - name: kubernetes.io/cluster/{{ .Values.infraName }}
+            value: owned
+          - name: Stack
+            value: project ocp4-cluster-j4t8v
+          - name: env_type
+            value: ocp4-cluster
+          - name: guid
+            value: j4t8v
+          - name: owner
+            value: unknown
+          - name: platform
+            value: RHPDS
+          - name: uuid
+            value: 76ade5fb-a1ac-5769-bae9-aa3c153bbf4f
+          userDataSecret:
+            name: worker-user-data
+      taints:
+        - effect: NoSchedule
+          key: nvidia.com/gpu

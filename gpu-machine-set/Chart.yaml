@@ -1,0 +1,8 @@
+apiVersion: v2
+
+name: demo-cluster-config
+description: A Helm chart for configuring OpenShift
+
+type: application
+version: 0.0.1
+appVersion: "latest"
