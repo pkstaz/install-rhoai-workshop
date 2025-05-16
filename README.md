@@ -86,7 +86,7 @@ helm install gpu-machine-set gpu-machine-set --set infraName=$INFRA_NAME --set s
 
 create machine-set (ARO) using helm
 ```
-helm install gpu-machine-set gpu-machine-set --set infraName=$INFRA_NAME --set subnet=$SUBNET --set availabilityZone=$AVAILABILITYZONE --set region=$REGION --set azure.imageSku=$IMAGESKU --set azure.imageVersion=$IMAGEVERSION --set azure.resourceGroup=$RESOURCEGROUP --set networkResourceGroup=$NETWORKRESOURCEGROUP --set azure.vNet=$VNET --set loadBalancer=$LOADBALANCER
+helm install gpu-machine-set gpu-machine-set --set infraName=$INFRA_NAME --set subnet=$SUBNET --set availabilityZone=$AVAILABILITYZONE --set region=$REGION --set azure.imageSku=$IMAGESKU --set azure.imageVersion=$IMAGEVERSION --set azure.resourceGroup=$RESOURCEGROUP --set azure.networkResourceGroup=$NETWORKRESOURCEGROUP --set azure.vNet=$VNET --set azure.loadBalancer=$LOADBALANCER
 ```
 
 Install operators through Operator Hub
