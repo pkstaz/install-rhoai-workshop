@@ -1,12 +1,21 @@
 app: demo-cluster-config
 
 infraName: 
-subnet:
-availabilityZone:
+
 region:
+availabilityZone:
+subnet:
+name: gpu-node
 
-gpuMachineset:
-  name: gpu-node
+cloud: azure
+aws:
   instance: g5.2xlarge
-
+azure:
+  instance: Standard_NC4as_T4_v3
+  imageSku:
+  imageVersion:
+  resourceGroup:
+  networkResourceGroup:
+  vNet:
+  loadBalancer:
 replicas: 1
