@@ -3,7 +3,7 @@ kind: MachineSet
 metadata:
   labels:
     machine.openshift.io/cluster-api-cluster: {{ .Values.infraName }}
-  name: {{ .Values.infraName }}-{{ .Values.gpuMachineset.name }}
+  name: {{ .Values.infraName }}-{{ .Values.name }}
   namespace: openshift-machine-api
 spec:
   replicas: {{ .Values.replicas }}
