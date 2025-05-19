@@ -28,12 +28,13 @@ rm -f get-helm-3
 
 
 ### Enable GPU (optional)
-Create env
-```
-OCP_DOMAIN=$(oc get IngressController default -n openshift-ingress-operator -o json | jq -r '.status.domain')
+
+Create environment variables:
 
 INFRA_NAME=$(oc get infrastructure cluster -o json | jq -r '.status.infrastructureName')
 
+For AWS:
+```
 SUBNET=$(oc get machineset.machine.openshift.io -n openshift-machine-api -o jsonpath='{.items[0].spec.template.spec.providerSpec.value.subnet.filters[0].values[0]}')
 
 AVAILABILITYZONE=$(oc get machineset.machine.openshift.io -n openshift-machine-api -o jsonpath='{.items[0].spec.template.spec.providerSpec.value.placement.availabilityZone}')
@@ -41,18 +42,51 @@ AVAILABILITYZONE=$(oc get machineset.machine.openshift.io -n openshift-machine-a
 REGION=$(oc get machineset.machine.openshift.io -n openshift-machine-api -o jsonpath='{.items[0].spec.template.spec.providerSpec.value.placement.region}')
 ```
 
-Validate env
+For Azure:
 ```
-echo $OCP_DOMAIN
+IMAGESKU=$(oc get machineset.machine.openshift.io -n openshift-machine-api -o jsonpath='{.items[0].spec.template.spec.providerSpec.value.image.sku}')
+
+IMAGEVERSION=$(oc get machineset.machine.openshift.io -n openshift-machine-api -o jsonpath='{.items[0].spec.template.spec.providerSpec.value.image.version}')
+
+RESOURCEGROUP=$(oc get machineset.machine.openshift.io -n openshift-machine-api -o jsonpath='{.items[0].spec.template.spec.providerSpec.value.resourceGroup}')
+
+NETWORKRESOURCEGROUP=$(oc get machineset.machine.openshift.io -n openshift-machine-api -o jsonpath='{.items[0].spec.template.spec.providerSpec.value.networkResourceGroup}')
+
+VNET=$(oc get machineset.machine.openshift.io -n openshift-machine-api -o jsonpath='{.items[0].spec.template.spec.providerSpec.value.vnet}')
+
+SUBNET=$(oc get machineset.machine.openshift.io -n openshift-machine-api -o jsonpath='{.items[0].spec.template.spec.providerSpec.value.subnet}')
+
+AVAILABILITYZONE=$(oc get machineset.machine.openshift.io -n openshift-machine-api -o jsonpath='{.items[0].spec.template.spec.providerSpec.value.zone}')
+
+REGION=$(oc get machineset.machine.openshift.io -n openshift-machine-api -o jsonpath='{.items[0].spec.template.spec.providerSpec.value.location}')
+
+LOADBALANCER=$(oc get machineset.machine.openshift.io -n openshift-machine-api -o jsonpath='{.items[0].spec.template.spec.providerSpec.value.publicLoadBalancer}')
+```
+
+Validate env
+
+```
 echo $INFRA_NAME
 echo $SUBNET
 echo $AVAILABILITYZONE
 echo $REGION
+
+echo $IMAGESKU
+echo $IMAGEVERSION
+echo $RESOURCEGROUP
+echo $NETWORKRESOURCEGROUP
+echo $VNET
+echo $LOADBALANCER
 ```
 
-create machine-set using helm
+create machine-set (OCP/AWS) using helm
 ```
 helm install gpu-machine-set gpu-machine-set --set infraName=$INFRA_NAME --set subnet=$SUBNET --set availabilityZone=$AVAILABILITYZONE --set region=$REGION
+```
+
+create machine-set (ARO) using helm
+```
+helm install gpu-machine-set --set infraName=$INFRA_NAME --set subnet=$SUBNET --set availabilityZone=$AVAILABILITYZONE --set region=$REGION --set azure.imageSku=$IMAGESKU --set azure.imageVersion=$IMAGEVERSION --set azure.resourceGroup=$RESOURCEGROUP --set azure.networkResourceGroup=$NETWORKRESOURCEGROUP --set azure.vNet=$VNET --set azure.loadBalancer=$LOADBALANCER
 ```
 
 Install operators through Operator Hub
