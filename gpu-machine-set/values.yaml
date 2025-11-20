@@ -9,7 +9,7 @@ name: gpu-node
 
 cloud: azure
 aws:
-  instance: g5.2xlarge
+  instance: g6.2xlarge
 azure:
   instance: Standard_NC4as_T4_v3
   imageSku:

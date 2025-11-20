@@ -111,6 +111,7 @@ echo "Load Balancer: $LOADBALANCER"
 
 ```bash
 helm install gpu-machine-set gpu-machine-set \
+  --set cloud=aws \
   --set infraName=$INFRA_NAME \
   --set subnet=$SUBNET \
   --set availabilityZone=$AVAILABILITYZONE \
@@ -121,6 +122,7 @@ helm install gpu-machine-set gpu-machine-set \
 
 ```bash
 helm install gpu-machine-set gpu-machine-set \
+  --set cloud=azure \
   --set infraName=$INFRA_NAME \
   --set subnet=$SUBNET \
   --set availabilityZone=$AVAILABILITYZONE \

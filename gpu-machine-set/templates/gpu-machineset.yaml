@@ -24,10 +24,14 @@ spec:
       providerSpec:
         value:
           apiVersion: machine.openshift.io/v1beta1
-          {{ if eq .Values.cloud "aws" }}
+          {{- if eq .Values.cloud "aws" }}
+          kind: AWSMachineProviderConfig
+          {{- else }}
+          kind: AzureMachineProviderSpec
+          {{- end }}
+          {{- if eq .Values.cloud "aws" }}
           ami:
             id: ami-09a50cc0693e3a489
-          apiVersion: machine.openshift.io/v1beta1
           blockDevices:
           - ebs:
               encrypted: true
@@ -42,7 +46,6 @@ spec:
           iamInstanceProfile:
             id: {{ .Values.infraName }}-worker-profile
           instanceType: {{ .Values.aws.instance }}
-          kind: AWSMachineProviderConfig
           metadata:
             creationTimestamp: null
           metadataServiceOptions: {}
@@ -80,8 +83,7 @@ spec:
             value: 76ade5fb-a1ac-5769-bae9-aa3c153bbf4f
           userDataSecret:
             name: worker-user-data
-          {{ else if eq .Values.cloud "azure" }}
-          kind: AzureMachineProviderSpec
+          {{- else if eq .Values.cloud "azure" }}
           image:
             offer: aro4
             publisher: azureopenshift
@@ -115,7 +117,7 @@ spec:
           vmSize: Standard_NC4as_T4_v3    
           acceleratedNetworking: true
           subnet: {{ .Values.subnet }}
-          {{ end }}
+          {{- end }}
       taints:
         - effect: NoSchedule
           key: nvidia.com/gpu
