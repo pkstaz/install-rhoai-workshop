@@ -1,23 +1,28 @@
 apiVersion: machine.openshift.io/v1beta1
 kind: MachineSet
 metadata:
+  annotations:
+    capacity.cluster-autoscaler.kubernetes.io/labels: kubernetes.io/arch=amd64
+    machine.openshift.io/GPU: '{{ .Values.gpuCount | default 0 }}'
+    machine.openshift.io/memoryMb: '{{ .Values.memoryMb | default 65536 }}'
+    machine.openshift.io/vCPU: '{{ .Values.vCPU | default 16 }}'
   labels:
     machine.openshift.io/cluster-api-cluster: {{ .Values.infraName }}
-  name: {{ .Values.infraName }}-{{ .Values.name }}
+  name: {{ .Values.infraName }}-{{ .Values.name }}-{{ .Values.availabilityZone }}
   namespace: openshift-machine-api
 spec:
   replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
       machine.openshift.io/cluster-api-cluster: {{ .Values.infraName }}
-      machine.openshift.io/cluster-api-machineset: {{ .Values.infraName }}-{{ .Values.name }}
+      machine.openshift.io/cluster-api-machineset: {{ .Values.infraName }}-{{ .Values.name }}-{{ .Values.availabilityZone }}
   template:
     metadata:
       labels:
         machine.openshift.io/cluster-api-cluster: {{ .Values.infraName }}
         machine.openshift.io/cluster-api-machine-role: worker
         machine.openshift.io/cluster-api-machine-type: worker
-        machine.openshift.io/cluster-api-machineset: {{ .Values.infraName }}-{{ .Values.name }}
+        machine.openshift.io/cluster-api-machineset: {{ .Values.infraName }}-{{ .Values.name }}-{{ .Values.availabilityZone }}
     spec:
       lifecycleHooks: {}
       metadata: {}
@@ -31,17 +36,18 @@ spec:
           {{- end }}
           {{- if eq .Values.cloud "aws" }}
           ami:
-            id: ami-09a50cc0693e3a489
+            id: {{ .Values.aws.ami | required "aws.ami is required" }}
           blockDevices:
           - ebs:
               encrypted: true
               iops: 0
               kmsKey:
                 arn: ""
-              volumeSize: 100
-              volumeType: gp2
+              volumeSize: {{ .Values.aws.volumeSize | default 1500 }}
+              volumeType: {{ .Values.aws.volumeType | default "gp3" }}
           credentialsSecret:
             name: aws-cloud-credentials
+          capacityReservationId: ''
           deviceIndex: 0
           iamInstanceProfile:
             id: {{ .Values.infraName }}-worker-profile
@@ -54,33 +60,38 @@ spec:
             region: {{ .Values.region }}
           securityGroups:
           - filters:
-            - name: tag:Name
+            - name: 'tag:Name'
               values:
               - {{ .Values.infraName }}-node
           - filters:
-            - name: tag:Name
+            - name: 'tag:Name'
               values:
               - {{ .Values.infraName }}-lb
           subnet:
             filters:
-            - name: tag:Name
+            - name: 'tag:Name'
               values:
-              - {{ .Values.subnet }}
+              - {{ .Values.subnet | required "subnet is required" }}
           tags:
           - name: kubernetes.io/cluster/{{ .Values.infraName }}
             value: owned
+          {{- if .Values.aws.tags }}
+          {{- range .Values.aws.tags }}
+          - name: {{ .name }}
+            value: {{ .value }}
+          {{- end }}
+          {{- else }}
           - name: Stack
-            value: project ocp4-cluster-j4t8v
-          - name: env_type
-            value: ocp4-cluster
+            value: project {{ .Values.infraName }}-cluster-{{ .Values.clusterGuid | default "unknown" }}
+          - name: config
+            value: openshift-cluster
           - name: guid
-            value: j4t8v
+            value: {{ .Values.clusterGuid | default "unknown" }}
           - name: owner
-            value: unknown
-          - name: platform
-            value: RHPDS
+            value: {{ .Values.clusterOwner | default "unknown" }}
           - name: uuid
-            value: 76ade5fb-a1ac-5769-bae9-aa3c153bbf4f
+            value: {{ .Values.clusterUuid | default "unknown" }}
+          {{- end }}
           userDataSecret:
             name: worker-user-data
           {{- else if eq .Values.cloud "azure" }}
@@ -118,6 +129,13 @@ spec:
           acceleratedNetworking: true
           subnet: {{ .Values.subnet }}
           {{- end }}
+      {{- if .Values.taints }}
       taints:
-        - effect: NoSchedule
-          key: nvidia.com/gpu
+      {{- range .Values.taints }}
+        - effect: {{ .effect }}
+          key: {{ .key }}
+          {{- if .value }}
+          value: {{ .value }}
+          {{- end }}
+      {{- end }}
+      {{- end }}

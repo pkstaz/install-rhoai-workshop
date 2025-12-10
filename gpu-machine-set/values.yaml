@@ -5,11 +5,14 @@ infraName:
 region:
 availabilityZone:
 subnet:
-name: gpu-node
+name: gpu-worker  # Will be combined with infraName and availabilityZone: {infraName}-{name}-{availabilityZone}
 
-cloud: azure
+cloud: aws
 aws:
   instance: g6.2xlarge
+  ami: ami-0bc8dda494f111572  # AMI ID for OpenShift 4.20 in your region
+  volumeSize: 1500
+  volumeType: gp3
 azure:
   instance: Standard_NC4as_T4_v3
   imageSku:
@@ -19,3 +22,32 @@ azure:
   vNet:
   loadBalancer:
 replicas: 1
+
+# GPU and resource annotations for OpenShift 4.20+
+gpuCount: 1
+memoryMb: 32768
+vCPU: 8
+
+# Optional: Cluster metadata for tags
+# clusterGuid: 8wfc4
+# clusterOwner: unknown
+# clusterUuid: c0fdab0c-09f5-5cee-b6d0-00e7601cebe6
+
+# Optional: Custom tags (if not provided, default tags will be used)
+# aws:
+#   tags:
+#     - name: Stack
+#       value: project openshift-cluster-8wfc4
+#     - name: config
+#       value: openshift-cluster
+#     - name: guid
+#       value: 8wfc4
+#     - name: owner
+#       value: unknown
+#     - name: uuid
+#       value: c0fdab0c-09f5-5cee-b6d0-00e7601cebe6
+
+# Optional: Taints for GPU nodes (commented out as your working YAML doesn't show taints)
+# taints:
+#   - effect: NoSchedule
+#     key: nvidia.com/gpu
